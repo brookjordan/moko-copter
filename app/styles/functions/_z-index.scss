@@ -1,0 +1,36 @@
+//  Max z-index of Safari until v4:
+//  http://stackoverflow.com/questions/8565821/css-max-z-index-value
+$max-z-index: 16777271;
+
+$_z-indexes: (
+  test-top
+);
+
+$_z-index-per-level: floor($max-z-index / (length($_z-indexes) + 1)) - 1;
+
+// So we can see the max-level by looking at the css file
+/* * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*                                                   */
+/*    Max z-index level: #{$_z-index-per-level}                     */
+  @for $z-index from 1 through length($_z-indexes) {
+/*      #{nth($_z-indexes, $z-index)} : #{$_z-index-per-level * $z-index};                     */
+  }
+/*                                                   */
+/* * * * * * * * * * * * * * * * * * * * * * * * * */
+
+@function z-index ($type, $level: null) {
+  $total-level: 0;
+
+  @if type-of($type) == 'number' {
+    $total-level: min($_z-index-per-level, $type);
+    $type:  null;
+  } @else if type-of($level) == 'number' {
+    $total-level: min($_z-index-per-level, $level);
+  }
+
+  @if $type != null && index($_z-indexes, $type) != null {
+    $total-level: $total-level + (index($_z-indexes, $type) * $_z-index-per-level);
+  }
+
+  @return $total-level;
+}
