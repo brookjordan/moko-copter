@@ -1,57 +1,50 @@
-import renderCanvas   from '../method/canvasSetter.js'
+import stage         from  '../method/stage.js';
+import control       from  '../method/control.js';
+import blocks        from  '../method/control-blocks.js';
+import renderSquare  from  '../method/render-square.js';
+import renderWorld   from  '../method/render-world.js';
+import renderBlocks  from  '../method/render-blocks.js';
+import threads       from  '../method/thread-runner.js';
 
 
-const canvasElement = document.getElementById('spryt-board');
-const boardWidth    = 9;
-const boardHeight   = 12;
-const retinaScale   = Window.devicePixelRatio;
+const mokoGlider = new Image();
+const mokoGliderURL = 'http://brookjordan.uk/tg/moko/images/moko-glider.png';
+const simThread    = threads.addThread('sim-thread', { fps: 60 });
+const renderThread = threads.addThread('render-thread', { fps: 10, simulate: false });
+const renderQueue  = [
+  () => renderWorld(stage),
+  () => renderBlocks(stage, blocks.blocks),
+];
 
-const sprytCanvas = renderCanvas(canvasElement, boardWidth, boardHeight, retinaScale);
-const { resize, canvas, ctx, x, y, s, sq } = sprytCanvas;
-const drawSquare = squareDropper({ before: showBounds });
+renderThread.addTask(render);
+mokoGlider.onload = () => {
+  renderQueue.push(() => renderSquare(stage, mokoGlider, control.size.width, control.size.height, control.pos.x, control.pos.y, control.pos.rot));
+};
+mokoGlider.src = mokoGliderURL;
+mokoGlider
+stage.tools.resizeCanvas();
+control.init(stage);
 
-canvasElement.style.transform = `scale(${1 / retinaScale})`;
+window.addEventListener('resize', stage.tools.resizeCanvas);
 
-resize();
-showBounds();
+window.addEventListener('touchstart', addSim);
+window.addEventListener('mousedown',  addSim);
+window.addEventListener('keydown',    addSim);
 
-window.addEventListener('resize', () => {
-  resize();
-  drawSquare();
-});
-
-
-function showBounds() {
-  ctx.fillStyle = 'rgba(0,255,0,1)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'rgba(0,0,255,1)';
-  ctx.fillRect(...sq(0, 0, boardWidth, boardHeight));
+function render() {
+  renderQueue.forEach(renderQueueItem => {
+    renderQueueItem();
+  });
 }
 
-function squareDropper({before=() => {}, after=() => {}} = {}) {
-  const squareSize = 3;
-  let x = (boardWidth / 2) - (squareSize / 2);
-  let y = -squareSize;
+function addSim() {
+  window.removeEventListener('touchstart', addSim);
+  window.removeEventListener('mousedown',  addSim);
+  window.removeEventListener('keydown',    addSim);
+  simThread.addTask(controlSim);
+  setTimeout(() => simThread.addTask(() => blocks.sim(stage, control)), 0);
+}
 
-  dropTheSquare();
-
-  return draw;
-
-  function dropTheSquare() {
-    y += 0.05;
-    x += Math.random() * 0.2 - 0.1;
-    if (y > boardHeight) {
-      y = -squareSize;
-      x = (boardWidth / 2) - (squareSize / 2);
-    }
-    draw();
-    requestAnimationFrame(dropTheSquare);
-  }
-
-  function draw() {
-    before();
-    ctx.fillStyle = 'rgb(255,0,0)';
-    ctx.fillRect(...sq(x, y, squareSize, squareSize));
-    after();
-  }
+function controlSim() {
+  control.sim(stage);
 }
