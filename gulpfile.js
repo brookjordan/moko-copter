@@ -12,7 +12,6 @@ const gutil             = require('gulp-util');
 const babel             = require('rollup-plugin-babel');
 const nodeResolve       = require('rollup-plugin-node-resolve');
 const commonjs          = require('rollup-plugin-commonjs');
-const replace           = require('rollup-plugin-replace');
 
 const $             = gulpLoadPlugins();
 const reload        = browserSync.reload;
@@ -67,9 +66,6 @@ gulp.task('scripts', () => {
         }),
         commonjs({
 
-        }),
-        replace({
-          'process.env.NODE_ENV': JSON.stringify( 'production' )
         }),
         babel({
           exclude: 'node_modules/**'
@@ -169,7 +165,7 @@ gulp.task('serve', ['handlebars', 'styles', 'scripts', 'fonts'], () => {
 
   gulp.watch('app/**/*.hbs', ['handlebars']);
   gulp.watch('app/styles/**/*.scss', ['styles']);
-  gulp.watch('app/scripts/**/*.js', ['scripts']);
+  gulp.watch('app/scripts/**/*.js*', ['scripts']);
   gulp.watch('app/fonts/**/*', ['fonts']);
 });
 
