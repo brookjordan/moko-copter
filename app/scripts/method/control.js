@@ -1,12 +1,12 @@
 const squareWidth    = 1.5;
-const squareHeight   = squareWidth * 0.89;
+const squareHeight   = squareWidth * 1;
 const jumpPower      = 0.4;
 const sideSpeed      = 0.1;
 const gravity        = 0.02;
 const bounceFriction = 0.5;
 const airResistance  = 0.99;
 const settleSpeed    = 0.1;
-const rotationFunction = y => Math.max(-0.2, Math.min(0.8, y * 1.8));
+const rotationFunction = y => Math.max(-0.1, Math.min(0.3, y * 0.8));
 
 const pos   = {};
 const speed = {

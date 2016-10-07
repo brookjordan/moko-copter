@@ -7,6 +7,9 @@ export default function buildStageCtx({ resize, canvas, ctx, offsetToStageX, off
     translate,
     save,
     restore,
+    createLinearGradient,
+    fillText,
+    font,
 
     _: ctx,
 
@@ -60,11 +63,24 @@ export default function buildStageCtx({ resize, canvas, ctx, offsetToStageX, off
     return ctx.translate(offsetToStageX(x), offsetToStageY(y));
   }
 
+  function createLinearGradient(x0, y0, x1, y1) {
+    return ctx.createLinearGradient(scaleToStage(x0), scaleToStage(y0), scaleToStage(x1), scaleToStage(y1));
+  }
+
   function save() {
     return ctx.save();
   }
 
   function restore() {
     return ctx.restore();
+  }
+
+  function fillText(text, x, y) {
+    return ctx.fillText(text, offsetToStageX(x), offsetToStageY(y));
+  }
+
+  function font(size, text) {
+    debugger;
+    return ctx.font = `${scaleToStage(size)}px ${text}`;
   }
 }
