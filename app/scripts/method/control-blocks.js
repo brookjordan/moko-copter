@@ -1,3 +1,5 @@
+import sendScore from '../method/send-score.js';
+
 const blocks        = [];
 const blockWidth    = 1;
 const blockSpacing  = 6;
@@ -44,13 +46,16 @@ function controlBlocks(stage, moko) {
     blocks.forEach(block => collideBlock(block, moko));
     if (insideGapPreviously && !insideGap) {
       score.current += 1;
-      score.high = Math.max(score.current, score.high);
     }
   } else if (!blocks.length) {
     restartSim();
   } else {
     insideGapPreviously = false;
     insideGap = false;
+    if (score.current > score.high) {
+      score.high = score.current;
+      sendScore(score.high);
+    }
     score.current = 0;
     blocks.forEach(block => block.opening = block.opening || (Math.random() * 0.5) + 0.3);
   }

@@ -75,12 +75,14 @@ export default function buildStageCtx({ resize, canvas, ctx, offsetToStageX, off
     return ctx.restore();
   }
 
-  function fillText(text, x, y) {
-    return ctx.fillText(text, offsetToStageX(x), offsetToStageY(y));
+  function fillText(text, x, y, offset=true) {
+    if (offset) {
+      return ctx.fillText(text, offsetToStageX(x), offsetToStageY(y));
+    }
+    return ctx.fillText(text, scaleToStage(x), scaleToStage(y));
   }
 
   function font(size, text) {
-    debugger;
     return ctx.font = `${scaleToStage(size)}px ${text}`;
   }
 }
