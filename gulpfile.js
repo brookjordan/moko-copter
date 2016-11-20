@@ -1,5 +1,15 @@
-// generated on 2016-08-16 using generator-webapp 2.1.0
+const version = '1.0.1';
+const filesToCache = ['index.html',
+                      'main.css',
+                      'main.js',
+                      'moko-copter.png',
+                      'lamp.png',
+                      'crates.png',
+                      'apple-touch-icon.png',
+                      'favicon.ico',];
+
 const gulp              = require('gulp');
+const file              = require('gulp-file');
 const gulpLoadPlugins   = require('gulp-load-plugins');
 const browserSync       = require('browser-sync');
 const del               = require('del');
@@ -12,12 +22,13 @@ const gutil             = require('gulp-util');
 const babel             = require('rollup-plugin-babel');
 const nodeResolve       = require('rollup-plugin-node-resolve');
 const commonjs          = require('rollup-plugin-commonjs');
+const handlebars        = require('gulp-compile-handlebars');
+const env               = require('gulp-env');
+const templateData      = require('./data.json');
+templateData.version = version;
 
 const $             = gulpLoadPlugins();
 const reload        = browserSync.reload;
-const handlebars    = require('gulp-compile-handlebars');
-const templateData  = require('./data.json');
-const env           = require('gulp-env');
 
 gulp.task('nodeenv', function() {
   env({
@@ -198,7 +209,7 @@ gulp.task('serve:test', ['scripts'], () => {
   gulp.watch('test/spec/**/*.js', ['lint:test']);
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'build-app-cache', 'html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
@@ -228,6 +239,19 @@ gulp.task('deploy-staging', ['nodeenv', 'build'], () => {
   return gulp.src( globs, { buffer: false } )
         .pipe( ftp_create.dest( STAGING_ROOT_URL ) );
 });
+
+gulp.task('build-app-cache', () => {
+  let str = `CACHE MANIFEST\n# Cache version ${version}\n`;
+
+  filesToCache.forEach(file => {
+    str += `http://brookjordan.uk/tg/moko/${file}\n`;
+  });
+ 
+  return file(`moko-copter--${version}.appcache`, str, { src: true })
+    .pipe(gulp.dest('dist'));
+})
+
+
 
 gulp.task('default', ['clean', 'set-env'], () => {
   gulp.start('build');
